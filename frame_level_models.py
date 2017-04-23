@@ -77,7 +77,7 @@ class MeanCNNsModel(models.BaseModel):
         net = slim.relu(net, 32, scope='relu1')
         net = slim.max_pool2d(net, [2, 2], scope='pool1')
         net = slim.conv2d(net, 64, [3, 3], scope='conv2')
-        net = slim.relu(net, 64, scope, scope='relu2')
+        net = slim.relu(net, 64, scope='relu2')
         net = slim.max_pool2d(net, [2, 2], scope='pool2')
         net = slim.conv2d(net, 128, [3, 3], scope='conv3')
         net = slim.relu(net, 128, scope='relu3')
