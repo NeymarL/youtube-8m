@@ -70,7 +70,7 @@ class MeanCNNsModel(models.BaseModel):
     i = 0
     for batch in model_input:
       with slim.arg_scope([slim.conv2d], padding='SAME',
-                           weights_initializer=tf.truncated_normal_initializer(stddev=0.01)
+                           weights_initializer=tf.truncated_normal_initializer(stddev=0.01),
                            weights_regularizer=slim.l2_regularizer(0.0005)):
         net = slim.conv2d(tf.expand_dims(model_input[i], 3), 20, [3, 3], scope='conv1')
         net = slim.relu(net, 32, scope='relu1')
