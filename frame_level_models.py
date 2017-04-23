@@ -92,6 +92,7 @@ class MeanCNNsModel(models.BaseModel):
         cnn_output.append(tf.reduce_sum(net, axis=[0]))# / tf.convert_to_tensor(num_frames[i], dtype = tf.float32)
         
     cnn_output = tf.convert_to_tensor(cnn_output, dtype = tf.float32)
+    print(cnn_output)
 
 
     aggregated_model = getattr(video_level_models,
