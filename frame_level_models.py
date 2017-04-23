@@ -64,7 +64,9 @@ class MeanCNNsModel(models.BaseModel):
       model in the 'predictions' key. The dimensions of the tensor are
       'batch_size' x 'num_classes'.
     """
+    print(model_input)
     batch_size = model_input.get_shape().as_list()[0]
+    print(batch_size)
     max_frame = model_input.get_shape().as_list()[1]
     model_input = tf.reshape(model_input, [batch_size, -1, 32, 32])
     cnn_output = []
