@@ -65,7 +65,8 @@ class MeanCNNsModel(models.BaseModel):
       'batch_size' x 'num_classes'.
     """
     batch_size = model_input.get_shape().as_list()[0]
-    model_input = tf.reshape(model_input, [batch_size, num_frames, 32, 32])
+    max_frame = model_input.get_shape().as_list()[1]
+    model_input = tf.reshape(model_input, [batch_size, -1, 32, 32])
     cnn_output = np.zeros([batch_size, 512])
     i = 0
     for batch in model_input:
