@@ -47,6 +47,62 @@ flags.DEFINE_string("video_level_classifier_model", "MoeModel",
 flags.DEFINE_integer("lstm_cells", 1024, "Number of LSTM cells.")
 flags.DEFINE_integer("lstm_layers", 2, "Number of LSTM layers.")
 
+
+class MeanCNNsModel(models.BaseModel):
+
+  def create_model(self, model_input, vocab_size, num_frames, is_training, **unused_params):
+    """
+    Args:
+      model_input: A 'batch_size' x 'max_frames' x 'num_features' matrix of
+                   input features.
+      vocab_size: The number of classes in the dataset.
+      num_frames: A vector of length 'batch' which indicates the number of
+           frames for each video (before padding).
+
+    Returns:
+      A dictionary with a tensor containing the probability predictions of the
+      model in the 'predictions' key. The dimensions of the tensor are
+      'batch_size' x 'num_classes'.
+    """
+    batch_size = len(model_input)
+    model_input = tf.reshape(model_input, [batch_size, num_frames, 32, 32])
+    cnn_output = np.zeros([batch_size, 512])
+    i = 0
+    for batch in model_input:
+      with slim.arg_scope([slim.conv2d], padding='SAME',
+                           weights_initializer=tf.truncated_normal_initializer(stddev=0.01)
+                           weights_regularizer=slim.l2_regularizer(0.0005)):
+        net = slim.conv2d(tf.expand_dims(model_input[i], 3), 20, [3, 3], scope='conv1')
+        net = slim.relu(net, 32, scope='relu1')
+        net = slim.max_pool2d(net, [2, 2], scope='pool1')
+        net = slim.conv2d(net, 64, [3, 3], scope='conv2')
+        net = slim.relu(net, 64, scope, scope='relu2')
+        net = slim.max_pool2d(net, [2, 2], scope='pool2')
+        net = slim.conv2d(net, 128, [3, 3], scope='conv3')
+        net = slim.relu(net, 128, scope='relu3')
+        net = slim.max_pool2d(net, [2, 2], scope='pool3')
+        net = slim.conv2d(net, 256, [3, 3], scope='conv4')
+        net = slim.relu(net, 256, scope='relu4')
+        net = slim.max_pool2d(net, [2, 2], scope='pool4')
+        net = slim.conv2d(net, 512, [3, 3], scope='conv5')
+        net = slim.relu(net, 512, scope='relu5')
+        net = slim.max_pool2d(net, [2, 2], scope='pool5')
+        net = tf.reshape(net, [num_frames[i], -1])
+        cnn_output[i] = tf.reduce_sum(net, axis=[0]) / num_frames[i]
+        
+      i = i + 1
+
+    cnn_output = tf.convert_to_tensor(cnn_output, dtype = tf.float32)
+
+
+    aggregated_model = getattr(video_level_models,
+                               FLAGS.video_level_classifier_model)
+
+    return aggregated_model().create_model(
+        model_input=cnn_output,
+        vocab_size=vocab_size,
+        **unused_params)
+
 class FrameLevelLogisticModel(models.BaseModel):
 
   def create_model(self, model_input, vocab_size, num_frames, **unused_params):
@@ -74,8 +130,7 @@ class FrameLevelLogisticModel(models.BaseModel):
 
     denominators = tf.reshape(
         tf.tile(num_frames, [1, feature_size]), [-1, feature_size])
-    avg_pooled = tf.reduce_sum(model_input,
-                               axis=[1]) / denominators
+    avg_pooled = tf.reduce_sum(model_input, axis=[1]) / denominators
 
     output = slim.fully_connected(
         avg_pooled, vocab_size, activation_fn=tf.nn.sigmoid,
