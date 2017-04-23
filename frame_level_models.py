@@ -67,7 +67,7 @@ class MeanCNNsModel(models.BaseModel):
     batch_size = model_input.get_shape().as_list()[0]
     max_frame = model_input.get_shape().as_list()[1]
     model_input = tf.reshape(model_input, [batch_size, -1, 32, 32])
-    cnn_output = np.zeros([batch_size, 512])
+    cnn_output = []
 
     for i in range(batch_size):
       with slim.arg_scope([slim.conv2d], padding='SAME',
@@ -89,7 +89,7 @@ class MeanCNNsModel(models.BaseModel):
         net = slim.relu(net, 512, scope='relu5')
         net = slim.max_pool2d(net, [2, 2], scope='pool5')
         net = tf.reshape(net, [num_frames[i], -1])
-        cnn_output[i] = tf.reduce_sum(net, axis=[0])# / tf.convert_to_tensor(num_frames[i], dtype = tf.float32)
+        cnn_output.append(tf.reduce_sum(net, axis=[0]))# / tf.convert_to_tensor(num_frames[i], dtype = tf.float32)
         
     cnn_output = tf.convert_to_tensor(cnn_output, dtype = tf.float32)
 
