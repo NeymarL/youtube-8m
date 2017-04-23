@@ -68,6 +68,8 @@ class MeanCNNsModel(models.BaseModel):
     max_frame = model_input.get_shape().as_list()[1]
     model_input = tf.reshape(model_input, [batch_size, -1, 32, 32])
     cnn_output = []
+    print(model_input)
+    print(batch_size)
 
     for i in range(batch_size):
       with slim.arg_scope([slim.conv2d], padding='SAME',
