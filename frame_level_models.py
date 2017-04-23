@@ -50,7 +50,7 @@ flags.DEFINE_integer("lstm_layers", 2, "Number of LSTM layers.")
 
 class MeanCNNsModel(models.BaseModel):
 
-  def create_model(self, model_input, vocab_size, num_frames, is_training, **unused_params):
+  def create_model(self, model_input, vocab_size, num_frames, **unused_params):
     """
     Args:
       model_input: A 'batch_size' x 'max_frames' x 'num_features' matrix of
@@ -64,12 +64,10 @@ class MeanCNNsModel(models.BaseModel):
       model in the 'predictions' key. The dimensions of the tensor are
       'batch_size' x 'num_classes'.
     """
-    print(model_input)
     batch_size = model_input.get_shape().as_list()[0]
     max_frame = model_input.get_shape().as_list()[1]
     model_input = tf.reshape(model_input, [batch_size, -1, 32, 32])
     cnn_output = []
-    print(batch_size)
 
     for i in range(batch_size):
       with slim.arg_scope([slim.conv2d], padding='SAME',
@@ -94,7 +92,7 @@ class MeanCNNsModel(models.BaseModel):
         cnn_output.append(tf.reduce_sum(net, axis=[0]))# / tf.convert_to_tensor(num_frames[i], dtype = tf.float32)
         
     cnn_output = tf.convert_to_tensor(cnn_output, dtype = tf.float32)
-    print(cnn_output)
+    # print(cnn_output)
 
 
     aggregated_model = getattr(video_level_models,
