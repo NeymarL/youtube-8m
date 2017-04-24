@@ -65,36 +65,46 @@ class MeanCNNsModel(models.BaseModel):
       'batch_size' x 'num_classes'.
     """
     print(model_input)
-    batch_size = model_input.get_shape().as_list()[0]
-    print(batch_size)
     max_frame = model_input.get_shape().as_list()[1]
-    model_input = tf.reshape(model_input, [batch_size, -1, 32, 32])
     cnn_output = []
 
-    for i in range(batch_size):
-      with slim.arg_scope([slim.conv2d], padding='SAME',
-                           weights_initializer=tf.truncated_normal_initializer(stddev=0.01),
-                           weights_regularizer=slim.l2_regularizer(0.0005)):
-        net = slim.conv2d(tf.expand_dims(model_input[i], 3), 20, [3, 3], scope='conv1')
-        net = slim.relu(net, 32, scope='relu1')
-        net = slim.max_pool2d(net, [2, 2], scope='pool1')
-        net = slim.conv2d(net, 64, [3, 3], scope='conv2')
-        net = slim.relu(net, 64, scope='relu2')
-        net = slim.max_pool2d(net, [2, 2], scope='pool2')
-        net = slim.conv2d(net, 128, [3, 3], scope='conv3')
-        net = slim.relu(net, 128, scope='relu3')
-        net = slim.max_pool2d(net, [2, 2], scope='pool3')
-        net = slim.conv2d(net, 256, [3, 3], scope='conv4')
-        net = slim.relu(net, 256, scope='relu4')
-        net = slim.max_pool2d(net, [2, 2], scope='pool4')
-        net = slim.conv2d(net, 512, [3, 3], scope='conv5')
-        net = slim.relu(net, 512, scope='relu5')
-        net = slim.max_pool2d(net, [2, 2], scope='pool5')
-        # net = tf.reshape(net, [num_frames[i], -1])
-        cnn_output.append(tf.reduce_sum(net, axis=[0]))# / tf.convert_to_tensor(num_frames[i], dtype = tf.float32)
+    with slim.arg_scope([slim.conv2d], padding='SAME',
+                         weights_initializer=tf.truncated_normal_initializer(stddev=0.01),
+                         weights_regularizer=slim.l2_regularizer(0.0005)):
+      net = slim.conv2d(tf.expand_dims(model_input[i], 3), 20, [3, 3], stride=[2, 2], scope='conv1')
+      print(net)
+      net = slim.relu(net, 32, scope='relu1')
+      print(net)
+      net = slim.max_pool2d(net, [2, 2], scope='pool1')
+      print(net)
+      net = slim.conv2d(net, 64, [3, 3], stride=[2, 2], scope='conv2')
+      print(net)
+      net = slim.relu(net, 64, scope='relu2')
+      print(net)
+      net = slim.max_pool2d(net, [2, 2], scope='pool2')
+      print(net)
+      net = slim.conv2d(net, 128, [3, 3], stride=[1, 2], scope='conv3')
+      print(net)
+      net = slim.relu(net, 128, scope='relu3')
+      print(net)
+      net = slim.max_pool2d(net, [2, 2], scope='pool3')
+      print(net)
+      net = slim.conv2d(net, 256, [3, 3], stride=[1, 2], scope='conv4')
+      print(net)
+      net = slim.relu(net, 256, scope='relu4')
+      print(net)
+      net = slim.max_pool2d(net, [2, 2], scope='pool4')
+      print(net)
+      net = slim.conv2d(net, 512, [3, 3], scope='conv5')
+      print(net)
+      net = slim.relu(net, 512, scope='relu5')
+      print(net)
+      net = slim.max_pool2d(net, [2, 2], scope='pool6_1')
+      net = slim.max_pool2d(net, [2, 2], scope='pool6_2')
+      cnn_output.append(tf.reshape(net, [-1, 512]))
         
     cnn_output = tf.convert_to_tensor(cnn_output, dtype = tf.float32)
-    # print(cnn_output)
+    print(cnn_output)
 
 
     aggregated_model = getattr(video_level_models,
