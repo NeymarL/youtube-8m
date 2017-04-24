@@ -66,7 +66,7 @@ class MeanCNNsModel(models.BaseModel):
     """
     print(model_input)
     max_frame = model_input.get_shape().as_list()[1]
-    cnn_output = []
+    # cnn_output = []
 
     with slim.arg_scope([slim.conv2d], padding='SAME',
                          weights_initializer=tf.truncated_normal_initializer(stddev=0.01),
@@ -101,9 +101,9 @@ class MeanCNNsModel(models.BaseModel):
       # print(net)
       net = slim.max_pool2d(net, [2, 2], scope='pool6_1')
       net = slim.max_pool2d(net, [2, 2], scope='pool6_2')
-      cnn_output.append(tf.reshape(net, [-1, 512]))
+      tf.reshape(net, [-1, 512])
         
-    cnn_output = tf.convert_to_tensor(cnn_output, dtype = tf.float32)
+    # cnn_output = tf.convert_to_tensor(cnn_output, dtype = tf.float32)
     # print(cnn_output)
 
 
@@ -111,7 +111,7 @@ class MeanCNNsModel(models.BaseModel):
                                FLAGS.video_level_classifier_model)
 
     return aggregated_model().create_model(
-        model_input=cnn_output,
+        model_input=net,
         vocab_size=vocab_size,
         **unused_params)
 
