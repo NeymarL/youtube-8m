@@ -64,48 +64,28 @@ class MeanCNNsModel(models.BaseModel):
       model in the 'predictions' key. The dimensions of the tensor are
       'batch_size' x 'num_classes'.
     """
-    print(model_input)
     max_frame = model_input.get_shape().as_list()[1]
-    # cnn_output = []
 
     with slim.arg_scope([slim.conv2d], padding='SAME',
                          weights_initializer=tf.truncated_normal_initializer(stddev=0.01),
                          weights_regularizer=slim.l2_regularizer(0.0005)):
-      net = slim.conv2d(tf.expand_dims(model_input, 3), 20, [3, 3], stride=[2, 2], scope='conv1')
-      # print(net)
+      net = slim.conv2d(tf.expand_dims(model_input, 3), 20, [3, 3], stride=[2, 2], normalizer_fn=slim.batch_norm, scope='conv1')
       net = slim.relu(net, 32, scope='relu1')
-      # print(net)
       net = slim.max_pool2d(net, [2, 2], scope='pool1')
-      # print(net)
-      net = slim.conv2d(net, 64, [3, 3], stride=[2, 2], scope='conv2')
-      # print(net)
+      net = slim.conv2d(net, 64, [3, 3], stride=[2, 2], normalizer_fn=slim.batch_norm, scope='conv2')
       net = slim.relu(net, 64, scope='relu2')
-      # print(net)
       net = slim.max_pool2d(net, [2, 2], scope='pool2')
-      # print(net)
-      net = slim.conv2d(net, 128, [3, 3], stride=[1, 2], scope='conv3')
-      # print(net)
+      net = slim.conv2d(net, 128, [3, 3], stride=[1, 2], normalizer_fn=slim.batch_norm, scope='conv3')
       net = slim.relu(net, 128, scope='relu3')
-      # print(net)
       net = slim.max_pool2d(net, [2, 2], scope='pool3')
-      # print(net)
-      net = slim.conv2d(net, 256, [3, 3], stride=[1, 2], scope='conv4')
-      # print(net)
+      net = slim.conv2d(net, 256, [3, 3], stride=[1, 2], normalizer_fn=slim.batch_norm, scope='conv4')
       net = slim.relu(net, 256, scope='relu4')
-      # print(net)
       net = slim.max_pool2d(net, [2, 2], scope='pool4')
-      # print(net)
-      net = slim.conv2d(net, 512, [3, 3], scope='conv5')
-      # print(net)
+      net = slim.conv2d(net, 512, [3, 3], normalizer_fn=slim.batch_norm, scope='conv5')
       net = slim.relu(net, 512, scope='relu5')
-      # print(net)
       net = slim.max_pool2d(net, [2, 2], scope='pool6_1')
       net = slim.max_pool2d(net, [2, 2], scope='pool6_2')
-      tf.reshape(net, [-1, 512])
-        
-    # cnn_output = tf.convert_to_tensor(cnn_output, dtype = tf.float32)
-    # print(cnn_output)
-
+      print(net)
 
     aggregated_model = getattr(video_level_models,
                                FLAGS.video_level_classifier_model)
