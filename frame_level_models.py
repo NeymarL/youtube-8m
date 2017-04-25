@@ -84,8 +84,8 @@ class MeanCNNsModel(models.BaseModel):
       net = slim.max_pool2d(net, [2, 2], scope='pool4')
       net = slim.conv2d(net, 512, [3, 3], scope='conv5')
       net = slim.relu(net, 512, scope='relu5')
-      net = slim.max_pool2d(net, [2, 2], scope='pool6_1')
-      net = slim.max_pool2d(net, [2, 2], scope='pool6_2')
+      net = slim.max_pool2d(net, [2, 2], scope='pool5_1')
+      net = slim.max_pool2d(net, [2, 2], scope='pool5_2')
       print(net)
 
     aggregated_model = getattr(video_level_models,
@@ -130,8 +130,8 @@ class CNNsModel(models.BaseModel):
       net = slim.conv2d(net, 256, [3, 3], scope='conv4')
       net = slim.relu(net, 256, scope='relu4')
       net = slim.max_pool2d(net, [2, 2], scope='pool4')
-      net = slim.conv2d(net, 512, [3, 3], scope='conv5')
-      net = slim.relu(net, 512, scope='relu5')
+      net = slim.conv2d(net, 256, [3, 3], scope='conv5')
+      net = slim.relu(net, 256, scope='relu5')
       net = slim.max_pool2d(net, [2, 2], scope='pool6')
       net = slim.conv2d(net, 512, [3, 3], scope='conv6')
       net = slim.relu(net, 512, scope='relu6')
@@ -139,8 +139,6 @@ class CNNsModel(models.BaseModel):
       net = slim.conv2d(net, 1024, [3, 3], scope='conv7')
       net = slim.relu(net, 1024, scope='relu7')
       net = slim.max_pool2d(net, [2, 2], scope='pool7')
-      net = slim.conv2d(net, 2048, [1, 1], scope='fc8')
-      net = slim.relu(net, 2048, scope='relu8')
       net = slim.max_pool2d(net, [2, 2], scope='pool8')
       print(net)
 
