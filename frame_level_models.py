@@ -65,7 +65,7 @@ class MeanCNNsModel(models.BaseModel):
       'batch_size' x 'num_classes'.
     """
     max_frame = model_input.get_shape().as_list()[1]
-
+    print(model_input)
     with slim.arg_scope([slim.conv2d], padding='SAME',
                          weights_initializer=tf.truncated_normal_initializer(stddev=0.01),
                          weights_regularizer=slim.l2_regularizer(0.0005),
@@ -86,7 +86,9 @@ class MeanCNNsModel(models.BaseModel):
       net = slim.relu(net, 512, scope='relu5')
       net = slim.max_pool2d(net, [2, 2], scope='pool5')
       net = slim.conv2d(net, 1024, [3, 3], scope='conv6')
+      net = slim.relu(net, 1024, scope='relu6')
       net = slim.max_pool2d(net, [2, 2], scope='pool6')
+      print(net)
       net = tf.squeeze(net)
       print(net)
 
