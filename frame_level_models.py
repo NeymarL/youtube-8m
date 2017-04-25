@@ -89,7 +89,7 @@ class MeanCNNsModel(models.BaseModel):
       net = slim.relu(net, 1024, scope='relu6')
       net = slim.max_pool2d(net, [2, 2], scope='pool6')
       print(net)
-      net = tf.squeeze(net)
+      net = tf.squeeze(net, [1, 2], name='conv6/squeezed')
       print(net)
 
     aggregated_model = getattr(video_level_models,
