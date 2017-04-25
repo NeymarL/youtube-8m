@@ -85,11 +85,9 @@ class MeanCNNsModel(models.BaseModel):
       net = slim.conv2d(net, 512, [3, 3], scope='conv5')
       net = slim.relu(net, 512, scope='relu5')
       net = slim.max_pool2d(net, [2, 2], scope='pool5')
-      net = slim.conv2d(net, 1024, [3, 3], scope='conv6')
-      net = slim.relu(net, 1024, scope='relu6')
       net = slim.max_pool2d(net, [2, 2], scope='pool6')
       print(net)
-      # net = tf.squeeze(net, [1, 2], name='conv6/squeezed')
+      net = tf.squeeze(net, [1, 2], name='conv6/squeezed')
       print(net)
 
     aggregated_model = getattr(video_level_models,
@@ -100,52 +98,6 @@ class MeanCNNsModel(models.BaseModel):
         vocab_size=vocab_size,
         **unused_params)
 
-class CNNsModel(models.BaseModel):
-
-  def create_model(self, model_input, vocab_size, num_frames, **unused_params):
-    """
-    Args:
-      model_input: A 'batch_size' x 'max_frames' x 'num_features' matrix of
-                   input features.
-      vocab_size: The number of classes in the dataset.
-      num_frames: A vector of length 'batch' which indicates the number of
-           frames for each video (before padding).
-
-    Returns:
-      A dictionary with a tensor containing the probability predictions of the
-      model in the 'predictions' key. The dimensions of the tensor are
-      'batch_size' x 'num_classes'.
-    """
-    max_frame = model_input.get_shape().as_list()[1]
-    model_input = tf.reshape(model_input, [-1, 32, 32], name='reshape1');
-
-    with slim.arg_scope([slim.conv2d], padding='SAME',
-                         weights_initializer=tf.truncated_normal_initializer(stddev=0.01),
-                         weights_regularizer=slim.l2_regularizer(0.0005),
-                         normalizer_fn=slim.batch_norm):
-      net = slim.conv2d(tf.expand_dims(model_input, 3), 64, [3, 3], stride=[1, 2], scope='conv1_1')
-      net = slim.conv2d(net, 64, [3, 3], stride=[1, 2], scope='conv1_2')
-      net = slim.max_pool2d(net, [2, 2], scope='pool1')
-      net = slim.conv2d(net, 128, [3, 3], stride=[2, 2], scope='conv2_1')
-      net = slim.conv2d(net, 128, [3, 3], scope='conv2_2')
-      net = slim.max_pool2d(net, [2, 2], scope='pool2')
-      net = slim.conv2d(net, 256, [3, 3], stride=[2, 2], scope='conv3_1')
-      net = slim.conv2d(net, 256, [3, 3], scope='conv3_2')
-      net = slim.max_pool2d(net, [2, 2], scope='pool3')
-      net = slim.conv2d(net, 512, [3, 3], stride=[2, 2], scope='conv4_1')
-      net = slim.max_pool2d(net, [2, 2], scope='pool4')
-      net = slim.conv2d(net, 512, [3, 3], scope='conv5_1')
-      net = slim.relu(net, 512, scope='relu5')
-      net = slim.max_pool2d(net, [2, 2], scope='pool5')
-      # net = slim.conv2d(net, 2048, [1, 1], scope='fc6')
-
-    aggregated_model = getattr(video_level_models,
-                               FLAGS.video_level_classifier_model)
-
-    return aggregated_model().create_model(
-        model_input=net,
-        vocab_size=vocab_size,
-        **unused_params)
 
 class FrameLevelLogisticModel(models.BaseModel):
 
