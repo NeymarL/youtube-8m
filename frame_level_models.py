@@ -84,8 +84,10 @@ class MeanCNNsModel(models.BaseModel):
       net = slim.max_pool2d(net, [2, 2], scope='pool4')
       net = slim.conv2d(net, 512, [3, 3], scope='conv5')
       net = slim.relu(net, 512, scope='relu5')
-      net = slim.max_pool2d(net, [2, 2], scope='pool5_1')
-      net = slim.max_pool2d(net, [2, 2], scope='pool5_2')
+      net = slim.max_pool2d(net, [2, 2], scope='pool5')
+      net = slim.conv2d(net, 1024, [3, 3], scope='conv6')
+      net = slim.max_pool2d(net, [2, 2], scope='pool6')
+      net = tf.squeeze(net)
       print(net)
 
     aggregated_model = getattr(video_level_models,
