@@ -153,7 +153,7 @@ class RecurrentCNNsModel(models.BaseModel):
     return lstm.create_model(
         model_input=network,
         vocab_size=vocab_size,
-        num_frames=[256 for x in num_frames],
+        num_frames=num_frames,
         **unused_params)
 
 
