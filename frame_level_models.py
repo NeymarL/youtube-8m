@@ -148,10 +148,9 @@ class RecurrentCNNsModel(models.BaseModel):
       network = tf.stack(network, 1)
       print(network)
 
-      aggregated_model = getattr(frame_level_models,
-                               FLAGS.LstmModel)
+      lstm = LstmModel()
 
-    return aggregated_model().create_model(
+    return lstm.create_model(
         model_input=network,
         vocab_size=vocab_size,
         num_frames=[256 for x in num_frames],
