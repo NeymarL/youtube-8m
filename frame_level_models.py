@@ -115,11 +115,12 @@ class RecurrentCNNsModel(models.BaseModel):
       model in the 'predictions' key. The dimensions of the tensor are
       'batch_size' x 'num_classes'.
     """
+    print(model_input)
     max_frame = model_input.get_shape().as_list()[1]
     image = tf.reshape(model_input, [-1, max_frame, 32, 32])
     image = tf.expand_dims(image, 4)
     images = tf.unstack(image, max_frame, 1)
-    print(images)
+    # print(images)
 
     network = []
     with slim.arg_scope([slim.conv2d], padding='SAME',
