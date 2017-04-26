@@ -99,6 +99,64 @@ class MeanCNNsModel(models.BaseModel):
         **unused_params)
 
 
+class RecurrentCNNsModel(models.BaseModel):
+
+  def create_model(self, model_input, vocab_size, num_frames, **unused_params):
+    """
+    Args:
+      model_input: A 'batch_size' x 'max_frames' x 'num_features' matrix of
+                   input features.
+      vocab_size: The number of classes in the dataset.
+      num_frames: A vector of length 'batch' which indicates the number of
+           frames for each video (before padding).
+
+    Returns:
+      A dictionary with a tensor containing the probability predictions of the
+      model in the 'predictions' key. The dimensions of the tensor are
+      'batch_size' x 'num_classes'.
+    """
+    max_frame = model_input.get_shape().as_list()[1]
+    image = tf.reshape(model_input, [-1, max_frame, 32, 32])
+    image = tf.expand_dims(image, 4)
+    images = tf.unstack(image, max_frame, 1)
+    print(images)
+
+    network = []
+    with slim.arg_scope([slim.conv2d], padding='SAME',
+                         weights_initializer=tf.truncated_normal_initializer(stddev=0.01),
+                         weights_regularizer=slim.l2_regularizer(0.0005),
+                         normalizer_fn=slim.batch_norm):
+      for img in images:
+          net = slim.conv2d(img, 32, [3, 3])
+          net = slim.relu(net, 32)
+          net = slim.max_pool2d(net, [2, 2])
+          net = slim.conv2d(net, 64, [3, 3])
+          net = slim.relu(net, 64)
+          net = slim.max_pool2d(net, [2, 2])
+          net = slim.conv2d(net, 128, [3, 3])
+          net = slim.relu(net, 128)
+          net = slim.max_pool2d(net, [2, 2])
+          net = slim.conv2d(net, 256, [3, 3])
+          net = slim.relu(net, 256)
+          net = slim.max_pool2d(net, [2, 2])
+          net = slim.conv2d(net, 256, [3, 3])
+          net = slim.relu(net, 256)
+          net = slim.max_pool2d(net, [2, 2])
+          net = tf.squeeze(net, [1, 2])
+          network.append(net)
+      network = tf.stack(network, 1)
+      print(network)
+
+      aggregated_model = getattr(frame_level_models,
+                               FLAGS.LstmModel)
+
+    return aggregated_model().create_model(
+        model_input=network,
+        vocab_size=vocab_size,
+        num_frames=[256 for x in num_frames],
+        **unused_params)
+
+
 class FrameLevelLogisticModel(models.BaseModel):
 
   def create_model(self, model_input, vocab_size, num_frames, **unused_params):
