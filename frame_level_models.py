@@ -99,10 +99,44 @@ class MeanCNNsModel(models.BaseModel):
         **unused_params)
 
 
+class RCNNCell(tf.contrib.rnn.BasicLSTMCell):
+    def __init__(self, num_units, forget_bias=1.0, input_size=None, state_is_tuple=True, activation=tf.tanh):
+        super().__init__(num_units, forget_bias, input_size, state_is_tuple, activation)
+        self.num_units = num_units
+        self.forget_bias = forget_bias
+        self.input_size = input_size
+        self.state_is_tuple = state_is_tuple
+        self.activation = activation
+        
+    def __call__(self, inputs, state, scope=None):
+        print(inputs)
+        inputs = tf.reshape(inputs, [-1, 32, 32])
+        inputs = tf.expand_dims(inputs, 3)
+        net = slim.conv2d(inputs, 32, [3, 3])
+        net = slim.relu(net, 32)
+        net = slim.max_pool2d(net, [2, 2])
+        net = slim.conv2d(net, 64, [3, 3])
+        net = slim.relu(net, 64)
+        net = slim.max_pool2d(net, [2, 2])
+        net = slim.conv2d(net, 128, [3, 3])
+        net = slim.relu(net, 128)
+        net = slim.max_pool2d(net, [2, 2])
+        net = slim.conv2d(net, 256, [3, 3])
+        net = slim.relu(net, 256)
+        net = slim.max_pool2d(net, [2, 2])
+        net = slim.conv2d(net, 256, [3, 3])
+        net = slim.relu(net, 256)
+        net = slim.max_pool2d(net, [2, 2])
+        net = tf.squeeze(net, [1, 2])
+        print(net)
+        return super().__call__(net, state, scope)
+
+
 class RecurrentCNNsModel(models.BaseModel):
 
   def create_model(self, model_input, vocab_size, num_frames, **unused_params):
-    """
+    """Creates a model which uses a stack of LSTMs to represent the video.
+
     Args:
       model_input: A 'batch_size' x 'max_frames' x 'num_features' matrix of
                    input features.
@@ -115,45 +149,26 @@ class RecurrentCNNsModel(models.BaseModel):
       model in the 'predictions' key. The dimensions of the tensor are
       'batch_size' x 'num_classes'.
     """
-    print(model_input)
-    max_frame = model_input.get_shape().as_list()[1]
-    image = tf.reshape(model_input, [-1, max_frame, 32, 32])
-    image = tf.expand_dims(image, 4)
-    images = tf.unstack(image, max_frame, 1)
-    # print(images)
+    lstm_size = FLAGS.lstm_cells
+    number_of_layers = FLAGS.lstm_layers
 
-    network = []
-    with slim.arg_scope([slim.conv2d], padding='SAME',
-                         weights_initializer=tf.truncated_normal_initializer(stddev=0.01),
-                         weights_regularizer=slim.l2_regularizer(0.0005),
-                         normalizer_fn=slim.batch_norm):
-      for img in images:
-          net = slim.conv2d(img, 32, [3, 3], scope='conv1')
-          net = slim.relu(net, 32, scope='relu1')
-          net = slim.max_pool2d(net, [2, 2], scope='pool1')
-          net = slim.conv2d(net, 64, [3, 3], scope='conv2')
-          net = slim.relu(net, 64, scope='relu2')
-          net = slim.max_pool2d(net, [2, 2], scope='pool2')
-          net = slim.conv2d(net, 128, [3, 3], scope='conv3')
-          net = slim.relu(net, 128, scope='relu3')
-          net = slim.max_pool2d(net, [2, 2], scope='pool3')
-          net = slim.conv2d(net, 256, [3, 3], scope='conv4')
-          net = slim.relu(net, 256, scope='relu4')
-          net = slim.max_pool2d(net, [2, 2], scope='pool4')
-          net = slim.conv2d(net, 256, [3, 3], scope='conv5')
-          net = slim.relu(net, 256, scope='relu5')
-          net = slim.max_pool2d(net, [2, 2], scope='pool5')
-          net = tf.squeeze(net, [1, 2], name='conv5/squeeze')
-          network.append(net)
-      network = tf.stack(network, 1)
-      print(network)
+    stacked_lstm = tf.contrib.rnn.MultiRNNCell(
+            [RCNNCell(lstm_size, forget_bias=1.0)].append(
+              tf.contrib.rnn.BasicLSTMCell(lstm_size, forget_bias=1.0)
+              ))
 
-      lstm = LstmModel()
+    loss = 0.0
 
-    return lstm.create_model(
-        model_input=network,
+    outputs, state = tf.nn.dynamic_rnn(stacked_lstm, model_input,
+                                       sequence_length=num_frames,
+                                       dtype=tf.float32)
+
+    aggregated_model = getattr(video_level_models,
+                               FLAGS.video_level_classifier_model)
+
+    return aggregated_model().create_model(
+        model_input=state[-1].h,
         vocab_size=vocab_size,
-        num_frames=num_frames,
         **unused_params)
 
 
