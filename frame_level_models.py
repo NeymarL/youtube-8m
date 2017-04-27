@@ -101,12 +101,7 @@ class MeanCNNsModel(models.BaseModel):
 
 class RCNNCell(tf.contrib.rnn.BasicLSTMCell):
     def __init__(self, num_units, forget_bias=1.0, input_size=None, state_is_tuple=True, activation=tf.tanh):
-        super().__init__(num_units, forget_bias, input_size, state_is_tuple, activation)
-        self.num_units = num_units
-        self.forget_bias = forget_bias
-        self.input_size = input_size
-        self.state_is_tuple = state_is_tuple
-        self.activation = activation
+        super(RCNNCell, self).__init__(num_units, forget_bias, input_size, state_is_tuple, activation)
         
     def __call__(self, inputs, state, scope=None):
         print(inputs)
@@ -129,7 +124,7 @@ class RCNNCell(tf.contrib.rnn.BasicLSTMCell):
         net = slim.max_pool2d(net, [2, 2])
         net = tf.squeeze(net, [1, 2])
         print(net)
-        return super().__call__(net, state, scope)
+        return super(RCNNCell, self).__call__(net, state, scope)
 
 
 class RecurrentCNNsModel(models.BaseModel):
@@ -152,7 +147,7 @@ class RecurrentCNNsModel(models.BaseModel):
     lstm_size = FLAGS.lstm_cells
     number_of_layers = FLAGS.lstm_layers
     print(lstm_size)
-    
+
     stacked_lstm = tf.contrib.rnn.MultiRNNCell(
             [
               RCNNCell(lstm_size, forget_bias=1.0),
