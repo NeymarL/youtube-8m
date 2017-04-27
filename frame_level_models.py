@@ -157,6 +157,7 @@ class RecurrentCNNsModel(models.BaseModel):
 
     outputs, state = tf.nn.dynamic_rnn(stacked_lstm, model_input,
                                        sequence_length=num_frames,
+                                       swap_memory=True, 
                                        dtype=tf.float32)
 
     aggregated_model = getattr(video_level_models,
