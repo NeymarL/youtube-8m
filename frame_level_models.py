@@ -128,10 +128,10 @@ def CNNs(inputs, reuse):
 class RCNNCell(tf.contrib.rnn.BasicLSTMCell):
     def __init__(self, num_units, forget_bias=1.0, input_size=None, state_is_tuple=True, activation=tf.tanh):
         super(RCNNCell, self).__init__(num_units, forget_bias, input_size, state_is_tuple, activation)
-        model_input = np.zeros([1, 1024])
-        model_input = tf.convert_to_tensor(model_input, dtype = tf.float32)
-        print("Init cnns: ", model_input)
-        output = CNNs(model_input, False)
+        # model_input = np.zeros([1, 1024])
+        # model_input = tf.convert_to_tensor(model_input, dtype = tf.float32)
+        # print("Init cnns: ", model_input)
+        # output = CNNs(model_input, False)
 
     def __call__(self, inputs, state, scope=None):
         print(inputs)
