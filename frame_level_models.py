@@ -151,11 +151,13 @@ class RecurrentCNNsModel(models.BaseModel):
     """
     lstm_size = FLAGS.lstm_cells
     number_of_layers = FLAGS.lstm_layers
-
+    print(lstm_size)
+    
     stacked_lstm = tf.contrib.rnn.MultiRNNCell(
-            [RCNNCell(lstm_size, forget_bias=1.0)].append(
+            [
+              RCNNCell(lstm_size, forget_bias=1.0),
               tf.contrib.rnn.BasicLSTMCell(lstm_size, forget_bias=1.0)
-              ))
+            ])
 
     loss = 0.0
 
