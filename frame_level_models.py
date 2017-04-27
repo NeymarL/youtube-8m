@@ -135,7 +135,29 @@ class RCNNCell(tf.contrib.rnn.BasicLSTMCell):
 
     def __call__(self, inputs, state, scope=None):
         print(inputs)
-        net = CNNs(inputs, True)
+        inputs = tf.reshape(inputs, [-1, 32, 32])
+        inputs = tf.expand_dims(inputs, 3)
+        with slim.arg_scope([slim.conv2d], padding='SAME',
+                               weights_initializer=tf.truncated_normal_initializer(stddev=0.01),
+                               weights_regularizer=slim.l2_regularizer(0.0005),
+                               normalizer_fn=slim.batch_norm,
+                               reuse=True):
+          net = slim.conv2d(inputs, 32, [3, 3], scope='conv1')
+          net = slim.relu(net, 32, scope='relu1')
+          net = slim.max_pool2d(net, [2, 2], scope='pool1')
+          net = slim.conv2d(net, 64, [3, 3], scope='conv2')
+          net = slim.relu(net, 64, scope='relu2')
+          net = slim.max_pool2d(net, [2, 2], scope='pool2')
+          net = slim.conv2d(net, 128, [3, 3], scope='conv3')
+          net = slim.relu(net, 128, scope='relu3')
+          net = slim.max_pool2d(net, [2, 2], scope='pool3')
+          net = slim.conv2d(net, 256, [3, 3], scope='conv4')
+          net = slim.relu(net, 256, scope='relu4')
+          net = slim.max_pool2d(net, [2, 2], scope='pool4')
+          net = slim.conv2d(net, 512, [3, 3], scope='conv5')
+          net = slim.relu(net, 512, scope='relu5')
+          net = slim.max_pool2d(net, [2, 2], scope='pool5')
+          net = tf.squeeze(net, [1, 2])
         print(net)
         return super(RCNNCell, self).__call__(net, state, scope)
 
@@ -180,6 +202,27 @@ class RecurrentCNNsModel(models.BaseModel):
         model_input=state[-1].h,
         vocab_size=vocab_size,
         **unused_params)
+
+
+class TemporalPoolingCNNModel(models.BaseModel):
+
+  def create_model(self, model_input, vocab_size, num_frames, **unused_params):
+    """Creates a model which uses a stack of LSTMs to represent the video.
+
+    Args:
+      model_input: A 'batch_size' x 'max_frames' x 'num_features' matrix of
+                   input features.
+      vocab_size: The number of classes in the dataset.
+      num_frames: A vector of length 'batch' which indicates the number of
+           frames for each video (before padding).
+
+    Returns:
+      A dictionary with a tensor containing the probability predictions of the
+      model in the 'predictions' key. The dimensions of the tensor are
+      'batch_size' x 'num_classes'.
+    """
+    i = 0
+
 
 
 class FrameLevelLogisticModel(models.BaseModel):
