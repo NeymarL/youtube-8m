@@ -104,7 +104,7 @@ class RCNNCell(tf.contrib.rnn.BasicLSTMCell):
         super(RCNNCell, self).__init__(num_units, forget_bias, input_size, state_is_tuple, activation)
         
     def __call__(self, inputs, state, scope=None):
-        print(net)
+        print(inputs)
         inputs = tf.reshape(inputs, [-1, 32, 32])
         inputs = tf.expand_dims(inputs, 3)
         net = slim.conv2d(inputs, 32, [3, 3])
