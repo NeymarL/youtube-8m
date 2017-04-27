@@ -118,8 +118,8 @@ def CNNs(inputs, reuse):
     net = slim.conv2d(net, 256, [3, 3], scope='conv4')
     net = slim.relu(net, 256, scope='relu4')
     net = slim.max_pool2d(net, [2, 2], scope='pool4')
-    net = slim.conv2d(net, 256, [3, 3], scope='conv5')
-    net = slim.relu(net, 256, scope='relu5')
+    net = slim.conv2d(net, 512, [3, 3], scope='conv5')
+    net = slim.relu(net, 512, scope='relu5')
     net = slim.max_pool2d(net, [2, 2], scope='pool5')
     net = tf.squeeze(net, [1, 2])
     return net
@@ -131,7 +131,7 @@ class RCNNCell(tf.contrib.rnn.BasicLSTMCell):
         model_input = np.zeros([1, 1024])
         model_input = tf.convert_to_tensor(model_input, dtype = tf.float32)
         print("Init cnns: ", model_input)
-        CNNs(model_input, False)
+        output = CNNs(model_input, False)
 
     def __call__(self, inputs, state, scope=None):
         print(inputs)
