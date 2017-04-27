@@ -47,6 +47,7 @@ flags.DEFINE_string("video_level_classifier_model", "MoeModel",
 flags.DEFINE_integer("lstm_cells", 1024, "Number of LSTM cells.")
 flags.DEFINE_integer("lstm_layers", 2, "Number of LSTM layers.")
 
+cnt = 0
 
 class MeanCNNsModel(models.BaseModel):
 
@@ -131,8 +132,14 @@ class RCNNCell(tf.contrib.rnn.BasicLSTMCell):
         super(RCNNCell, self).__init__(num_units, forget_bias, input_size, state_is_tuple, activation)
 
     def __call__(self, inputs, state, scope=None):
+        global cnt
         print(inputs)
-        net = CNNs(inputs, False)
+        if cnt == 0:
+          reuse = False
+        else:
+          reuse = True
+        print("Reuse: ", reuse)
+        net = CNNs(inputs, reuse)
         print(net)
         return super(RCNNCell, self).__call__(net, state, scope)
 
