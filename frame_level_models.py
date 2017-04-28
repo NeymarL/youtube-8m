@@ -122,7 +122,8 @@ def CNNs(inputs, reuse):
   net = slim.conv2d(net, 512, [3, 3], scope='conv5')
   net = slim.relu(net, 512, scope='relu5')
   net = slim.max_pool2d(net, [2, 2], scope='pool5')
-
+  net = tf.squeeze(net, [1, 2], name='squeeze')
+  
   return net
 
 
