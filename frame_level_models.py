@@ -204,6 +204,8 @@ class TemporalPoolingCNNModel(models.BaseModel):
       model in the 'predictions' key. The dimensions of the tensor are
       'batch_size' x 'num_classes'.
     """
+    global cnt
+    
     max_frame = model_input.get_shape().as_list()[1]
     image = tf.reshape(model_input, [-1, max_frame, 32, 32])
     image = tf.expand_dims(image, 4)
