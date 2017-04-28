@@ -73,7 +73,7 @@ if __name__ == "__main__":
         "regularization_penalty", 1.0,
         "How much weight to give to the regularization loss (the label loss has "
         "a weight of 1).")
-    flags.DEFINE_float("base_learning_rate", 0.001,
+    flags.DEFINE_float("base_learning_rate", 0.003,
                        "Which learning rate to start with.")
     flags.DEFINE_float("learning_rate_decay", 0.95,
                        "Learning rate decay factor to be applied every "
@@ -187,7 +187,7 @@ def build_graph(reader,
                 train_data_pattern,
                 label_loss_fn=losses.CrossEntropyLoss(),
                 batch_size=1000,
-                base_learning_rate=0.01,
+                base_learning_rate=0.003,
                 learning_rate_decay_examples=1000000,
                 learning_rate_decay=0.95,
                 optimizer_class=tf.train.AdamOptimizer,
@@ -460,8 +460,8 @@ class Trainer(object):
                         logging.info("training step " + str(global_step_val) + " | Loss: " +
                                      ("%.2f" % loss_val) + " Examples/sec: " + ("%.2f" % examples_per_second))
             except tf.errors.OutOfRangeError:
-                logging.info("%s: Done training -- epoch limit reached.",
-                             task_as_string(self.task))
+                logging.info("Done training -- epoch limit reached.")
+                             #task_as_string(self.task))
 
         logging.info("%s: Exited training loop.", task_as_string(self.task))
         sv.Stop()
