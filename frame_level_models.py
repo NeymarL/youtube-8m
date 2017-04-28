@@ -138,6 +138,7 @@ class RCNNCell(tf.contrib.rnn.BasicLSTMCell):
           reuse = False
         else:
           reuse = True
+        cnt = cnt + 1
         print("Reuse: ", reuse)
         net = CNNs(inputs, reuse)
         print(net)
