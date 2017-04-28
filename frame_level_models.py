@@ -213,9 +213,9 @@ class TemporalPoolingCNNModel(models.BaseModel):
     reuse = False
     for img in image:
       if i == 0:
-          reuse = False
-        else:
-          reuse = True
+        reuse = False
+      else:
+        reuse = True
       with slim.arg_scope([slim.conv2d], padding='SAME',
                          weights_initializer=tf.truncated_normal_initializer(stddev=0.01),
                          weights_regularizer=slim.l2_regularizer(0.0005),
