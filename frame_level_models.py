@@ -209,11 +209,18 @@ class TemporalPoolingCNNModel(models.BaseModel):
     image = tf.expand_dims(image, 4)
     image = tf.unstack(image, max_frame, 1)
     network = []
+    i = 0
+    reuse = False
     for img in image:
+      if i == 0:
+          reuse = False
+        else:
+          reuse = True
       with slim.arg_scope([slim.conv2d], padding='SAME',
                          weights_initializer=tf.truncated_normal_initializer(stddev=0.01),
                          weights_regularizer=slim.l2_regularizer(0.0005),
-                         normalizer_fn=slim.batch_norm):
+                         normalizer_fn=slim.batch_norm,
+                         reuse=reuse):
         net = slim.conv2d(img, 16, [3, 3], scope='conv1')
         net = slim.relu(net, 16, scope='relu1')
         net = slim.max_pool2d(net, [2, 2], scope='pool1')
@@ -230,6 +237,7 @@ class TemporalPoolingCNNModel(models.BaseModel):
         net = slim.relu(net, 256, scope='relu5')
         net = slim.max_pool2d(net, [2, 2], scope='pool5')
         net = tf.squeeze(net, [1, 2], name='squeeze1')
+        i = i + 1
       network.append(net)
     network = tf.stack(network, 1)
     print(network)
