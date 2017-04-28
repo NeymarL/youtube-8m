@@ -210,6 +210,13 @@ class TemporalPoolingCNNModel(models.BaseModel):
     image = tf.unstack(image, max_frame, 1)
     network = []
     i = 0
+
+    Reuse = False
+    if cnt == 0:
+      Reuse = False
+    else:
+      Reuse = True
+
     reuse = False
     for img in image:
       if i == 0:
@@ -220,7 +227,7 @@ class TemporalPoolingCNNModel(models.BaseModel):
                          weights_initializer=tf.truncated_normal_initializer(stddev=0.01),
                          weights_regularizer=slim.l2_regularizer(0.0005),
                          normalizer_fn=slim.batch_norm,
-                         reuse=reuse):
+                         reuse=(reuse or Reuse)):
         net = slim.conv2d(img, 16, [3, 3], scope='conv1')
         net = slim.relu(net, 16, scope='relu1', reuse=reuse)
         net = slim.max_pool2d(net, [2, 2], scope='pool1')
@@ -244,7 +251,8 @@ class TemporalPoolingCNNModel(models.BaseModel):
     with slim.arg_scope([slim.conv2d], padding='SAME',
                          weights_initializer=tf.truncated_normal_initializer(stddev=0.01),
                          weights_regularizer=slim.l2_regularizer(0.0005),
-                         normalizer_fn=slim.batch_norm):
+                         normalizer_fn=slim.batch_norm,
+                         reuse=Reuse):
       net = tf.expand_dims(network, 3)
       net = slim.max_pool2d(net, [2, 2], scope='temporal_pool')
       net = slim.conv2d(net, 256, [3, 3], stride=[2, 2], scope='conv6')
@@ -260,6 +268,7 @@ class TemporalPoolingCNNModel(models.BaseModel):
       net = slim.max_pool2d(net, [2, 2], scope='pool8_2')
       net = tf.squeeze(net, [1, 2], name='squeeze2')
     print(net)
+    cnt = cnt + 1
 
     aggregated_model = getattr(video_level_models,
                                FLAGS.video_level_classifier_model)
