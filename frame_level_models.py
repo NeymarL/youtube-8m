@@ -66,28 +66,32 @@ class MeanCNNsModel(models.BaseModel):
       'batch_size' x 'num_classes'.
     """
     max_frame = model_input.get_shape().as_list()[1]
+    dropout_keep_prob = 0.5
     print(model_input)
     with slim.arg_scope([slim.conv2d], padding='SAME',
                          weights_initializer=tf.truncated_normal_initializer(stddev=0.01),
                          weights_regularizer=slim.l2_regularizer(0.0005),
                          normalizer_fn=slim.batch_norm):
-      net = slim.max_pool2d(tf.expand_dims(model_input, 3), [2, 2], scope='temporal_pooling')
-      net = slim.conv2d(net, 64, [3, 3], stride=[2, 2], scope='conv1')
-      net = slim.relu(net, 64, scope='relu1')
+      net = slim.conv2d(tf.expand_dims(model_input, 3), 32, [7, 11], stride=[1, 4], scope='conv1')
+      net = slim.relu(net, 32, scope='relu1')
       net = slim.max_pool2d(net, [2, 2], scope='pool1')
-      net = slim.conv2d(net, 128, [3, 3], stride=[2, 2], scope='conv2')
-      net = slim.relu(net, 128, scope='relu2')
+      net = slim.conv2d(net, 64, [5, 5], scope='conv2')
+      net = slim.relu(net, 64, scope='relu2')
       net = slim.max_pool2d(net, [2, 2], scope='pool2')
-      net = slim.conv2d(net, 256, [3, 3], stride=[1, 2], scope='conv3')
+      net = slim.conv2d(net, 256, [3, 3], scope='conv3')
       net = slim.relu(net, 256, scope='relu3')
       net = slim.max_pool2d(net, [2, 2], scope='pool3')
-      net = slim.conv2d(net, 512, [3, 3], stride=[1, 2], scope='conv4')
+      net = slim.conv2d(net, 512, [3, 3], scope='conv4')
       net = slim.relu(net, 512, scope='relu4')
       net = slim.max_pool2d(net, [2, 2], scope='pool4')
       net = slim.conv2d(net, 1024, [3, 3], scope='conv5')
       net = slim.relu(net, 1024, scope='relu5')
       net = slim.max_pool2d(net, [2, 2], scope='pool5')
-      net = tf.squeeze(net, [1, 2], name='conv6/squeezed')
+      net = slim.conv2d(net, 4096, [9, 8], padding='VALID', scope='fc6')
+      # net = slim.dropout(net, dropout_keep_prob, scope='dropout6')
+      net = slim.conv2d(net, 4096, [1, 1], scope='fc7')
+      # net = slim.dropout(net, dropout_keep_prob, scope='dropout7')
+      net = tf.squeeze(net, [1, 2], name='squeezed')
       print(net)
 
     aggregated_model = getattr(video_level_models,
