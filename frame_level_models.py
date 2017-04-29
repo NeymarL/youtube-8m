@@ -71,7 +71,8 @@ class MeanCNNsModel(models.BaseModel):
                          weights_initializer=tf.truncated_normal_initializer(stddev=0.01),
                          weights_regularizer=slim.l2_regularizer(0.0005),
                          normalizer_fn=slim.batch_norm):
-      net = slim.conv2d(tf.expand_dims(model_input, 3), 64, [3, 3], stride=[2, 2], scope='conv1')
+      net = slim.max_pool2d(tf.expand_dims(model_input, 3), [2, 2], scope='temporal_pooling')
+      net = slim.conv2d(net, 64, [3, 3], stride=[2, 2], scope='conv1')
       net = slim.relu(net, 64, scope='relu1')
       net = slim.max_pool2d(net, [2, 2], scope='pool1')
       net = slim.conv2d(net, 128, [3, 3], stride=[2, 2], scope='conv2')
@@ -86,7 +87,6 @@ class MeanCNNsModel(models.BaseModel):
       net = slim.conv2d(net, 1024, [3, 3], scope='conv5')
       net = slim.relu(net, 1024, scope='relu5')
       net = slim.max_pool2d(net, [2, 2], scope='pool5')
-      net = slim.max_pool2d(net, [2, 2], scope='pool6')
       print(net)
       net = tf.squeeze(net, [1, 2], name='conv6/squeezed')
       print(net)
