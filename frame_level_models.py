@@ -87,7 +87,6 @@ class MeanCNNsModel(models.BaseModel):
       net = slim.conv2d(net, 1024, [3, 3], scope='conv5')
       net = slim.relu(net, 1024, scope='relu5')
       net = slim.max_pool2d(net, [2, 2], scope='pool5')
-      print(net)
       net = tf.squeeze(net, [1, 2], name='conv6/squeezed')
       print(net)
 
@@ -102,27 +101,27 @@ class MeanCNNsModel(models.BaseModel):
 def CNNs(inputs, reuse):
   inputs = tf.reshape(inputs, [-1, 32, 32])
   inputs = tf.expand_dims(inputs, 3)
-  with slim.arg_scope([slim.conv2d], padding='SAME',
-                         weights_initializer=tf.truncated_normal_initializer(stddev=0.01),
-                         weights_regularizer=slim.l2_regularizer(0.0005),
-                         normalizer_fn=slim.batch_norm,
-                         reuse=reuse):
-    net = slim.conv2d(inputs, 32, [3, 3], scope='conv1')
-    net = slim.relu(net, 32, scope='relu1')
-    net = slim.max_pool2d(net, [2, 2], scope='pool1')
-    net = slim.conv2d(net, 64, [3, 3], scope='conv2')
-    net = slim.relu(net, 64, scope='relu2')
-    net = slim.max_pool2d(net, [2, 2], scope='pool2')
-    net = slim.conv2d(net, 128, [3, 3], scope='conv3')
-    net = slim.relu(net, 128, scope='relu3')
-    net = slim.max_pool2d(net, [2, 2], scope='pool3')
-    net = slim.conv2d(net, 256, [3, 3], scope='conv4')
-    net = slim.relu(net, 256, scope='relu4')
-    net = slim.max_pool2d(net, [2, 2], scope='pool4')
-    net = slim.conv2d(net, 512, [3, 3], scope='conv5')
-    net = slim.relu(net, 512, scope='relu5')
-    net = slim.max_pool2d(net, [2, 2], scope='pool5')
-    net = tf.squeeze(net, [1, 2], name='squeeze')
+  # with slim.arg_scope([slim.conv2d], padding='SAME',
+  #                        weights_initializer=tf.truncated_normal_initializer(stddev=0.01),
+  #                        weights_regularizer=slim.l2_regularizer(0.0005),
+  #                        normalizer_fn=slim.batch_norm,
+  #                        reuse=reuse):
+  net = slim.conv2d(inputs, 32, [3, 3], scope='conv1')
+  net = slim.relu(net, 32, scope='relu1')
+  net = slim.max_pool2d(net, [2, 2], scope='pool1')
+  net = slim.conv2d(net, 64, [3, 3], scope='conv2')
+  net = slim.relu(net, 64, scope='relu2')
+  net = slim.max_pool2d(net, [2, 2], scope='pool2')
+  net = slim.conv2d(net, 128, [3, 3], scope='conv3')
+  net = slim.relu(net, 128, scope='relu3')
+  net = slim.max_pool2d(net, [2, 2], scope='pool3')
+  net = slim.conv2d(net, 256, [3, 3], scope='conv4')
+  net = slim.relu(net, 256, scope='relu4')
+  net = slim.max_pool2d(net, [2, 2], scope='pool4')
+  net = slim.conv2d(net, 512, [3, 3], scope='conv5')
+  net = slim.relu(net, 512, scope='relu5')
+  net = slim.max_pool2d(net, [2, 2], scope='pool5')
+  net = tf.squeeze(net, [1, 2], name='squeeze')
 
   return net
 
@@ -132,15 +131,7 @@ class RCNNCell(tf.contrib.rnn.BasicLSTMCell):
         super(RCNNCell, self).__init__(num_units, forget_bias, input_size, state_is_tuple, activation)
 
     def __call__(self, inputs, state, scope=None):
-        global cnt
-        print("Input: ", inputs)
-        if cnt == 0:
-          reuse = False
-        else:
-          reuse = True
-        cnt = cnt + 1
-        print("Reuse: ", reuse)
-        net = CNNs(inputs, reuse)
+        net = CNNs(inputs, None)
         print("After CNN: ", net)
         return super(RCNNCell, self).__call__(net, state, scope)
 
