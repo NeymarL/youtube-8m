@@ -159,7 +159,7 @@ class RecurrentCNNsModel(models.BaseModel):
     stacked_lstm = tf.contrib.rnn.MultiRNNCell(
             [
               RCNNCell(lstm_size, forget_bias=1.0),
-              tf.contrib.rnn.BasicLSTMCell(lstm_size, forget_bias=1.0)
+              tf.contrib.rnn.BasicLSTMCell(512, forget_bias=1.0)
             ])
 
     loss = 0.0
