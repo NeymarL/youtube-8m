@@ -102,8 +102,6 @@ def CNNs(inputs):
   inputs = tf.reshape(inputs, [-1, 32, 32])
   inputs = tf.expand_dims(inputs, 3)
   with slim.arg_scope([slim.conv2d], padding='SAME',
-                         weights_initializer=tf.truncated_normal_initializer(stddev=0.01),
-                         weights_regularizer=slim.l2_regularizer(0.0005),
                          normalizer_fn=slim.batch_norm):
     net = slim.conv2d(inputs, 32, [3, 3], scope='conv1')
     net = slim.relu(net, 32, scope='relu1')
