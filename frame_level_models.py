@@ -194,73 +194,29 @@ class TemporalPoolingCNNModel(models.BaseModel):
       model in the 'predictions' key. The dimensions of the tensor are
       'batch_size' x 'num_classes'.
     """
-    global cnt
-
+    print(model_input, vocab_size)
     max_frame = model_input.get_shape().as_list()[1]
-    image = tf.reshape(model_input, [-1, max_frame, 32, 32])
-    image = tf.expand_dims(image, 4)
-    image = tf.unstack(image, max_frame, 1)
-    network = []
-    i = 0
+    image = tf.reshape(model_input, [-1, 32, 32])
+    image = tf.expand_dims(image, 3)
+    with slim.arg_scope([slim.conv2d],
+                     weights_initializer=tf.truncated_normal_initializer(stddev=0.01),
+                     weights_regularizer=slim.l2_regularizer(0.0005),
+                     normalizer_fn=slim.batch_norm):
+      net = slim.conv2d(image, 32, [5, 5], padding='VALID', scope='conv1')
+      net = slim.relu(net, 32, scope='relu1')
+      net = slim.max_pool2d(net, [2, 2], scope='pool1')
+      net = slim.conv2d(net, 64, [5, 5], padding='VALID', scope='conv2')
+      net = slim.relu(net, 64, scope='relu2')
+      net = slim.max_pool2d(net, [2, 2], scope='pool2')
+      net = slim.conv2d(net, 128, [5, 5], padding='VALID', scope='conv3')
+      net = slim.relu(net, 128, scope='relu3')
+      net = tf.squeeze(net, [1, 2], name='squeezed')
+      print(net)
 
-    Reuse = False
-    if cnt == 0:
-      Reuse = False
-    else:
-      Reuse = True
-
-    reuse = False
-    for img in image:
-      if i == 0:
-        reuse = False
-      else:
-        reuse = True
-      with slim.arg_scope([slim.conv2d], padding='SAME',
-                         weights_initializer=tf.truncated_normal_initializer(stddev=0.01),
-                         weights_regularizer=slim.l2_regularizer(0.0005),
-                         normalizer_fn=slim.batch_norm,
-                         reuse=(reuse or Reuse)):
-        net = slim.conv2d(img, 16, [3, 3], scope='conv1')
-        net = slim.relu(net, 16, scope='relu1', reuse=reuse)
-        net = slim.max_pool2d(net, [2, 2], scope='pool1')
-        net = slim.conv2d(net, 32, [3, 3], scope='conv2')
-        net = slim.relu(net, 32, scope='relu2', reuse=reuse)
-        net = slim.max_pool2d(net, [2, 2], scope='pool2')
-        net = slim.conv2d(net, 64, [3, 3], scope='conv3')
-        net = slim.relu(net, 64, scope='relu3', reuse=reuse)
-        net = slim.max_pool2d(net, [2, 2], scope='pool3')
-        net = slim.conv2d(net, 128, [3, 3], scope='conv4')
-        net = slim.relu(net, 128, scope='relu4', reuse=reuse)
-        net = slim.max_pool2d(net, [2, 2], scope='pool4')
-        net = slim.conv2d(net, 256, [3, 3], scope='conv5')
-        net = slim.relu(net, 256, scope='relu5', reuse=reuse)
-        net = slim.max_pool2d(net, [2, 2], scope='pool5')
-        net = tf.squeeze(net, [1, 2], name='squeeze1')
-        i = i + 1
-      network.append(net)
-    network = tf.stack(network, 1)
-    print(network)
-    with slim.arg_scope([slim.conv2d], padding='SAME',
-                         weights_initializer=tf.truncated_normal_initializer(stddev=0.01),
-                         weights_regularizer=slim.l2_regularizer(0.0005),
-                         normalizer_fn=slim.batch_norm,
-                         reuse=Reuse):
-      net = tf.expand_dims(network, 3)
-      net = slim.max_pool2d(net, [2, 2], scope='temporal_pool')
-      net = slim.conv2d(net, 256, [3, 3], stride=[2, 2], scope='conv6')
-      net = slim.relu(net, 256, scope='relu6')
-      net = slim.max_pool2d(net, [2, 2], scope='pool6')
-      net = slim.conv2d(net, 512, [3, 3], stride=[2, 2], scope='conv7')
-      net = slim.relu(net, 512, scope='relu7')
-      net = slim.max_pool2d(net, [2, 2], scope='pool7_1')
-      net = slim.max_pool2d(net, [2, 2], scope='pool7_2')
-      net = slim.conv2d(net, 1024, [3, 3], scope='conv8')
-      net = slim.relu(net, 1024, scope='relu8')
-      net = slim.max_pool2d(net, [2, 2], scope='pool8_1')
-      net = slim.max_pool2d(net, [2, 2], scope='pool8_2')
-      net = tf.squeeze(net, [1, 2], name='squeeze2')
+    net = tf.reshape(net, [-1, max_frame, 128])
+    net = FramePooling(net, 'max')
+    net = slim.fully_connected(net, 1024, scope='fc4')
     print(net)
-    cnt = cnt + 1
 
     aggregated_model = getattr(video_level_models,
                                FLAGS.video_level_classifier_model)
