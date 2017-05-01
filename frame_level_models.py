@@ -214,7 +214,7 @@ class TemporalPoolingCNNModel(models.BaseModel):
       print(net)
 
     net = tf.reshape(net, [-1, max_frame, 128])
-    net = FramePooling(net, 'max')
+    net = util.FramePooling(net, 'max')
     net = slim.fully_connected(net, 1024, scope='fc4')
     print(net)
 
