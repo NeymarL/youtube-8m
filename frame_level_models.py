@@ -89,7 +89,7 @@ class MeanCNNsModel(models.BaseModel):
       net = slim.max_pool2d(net, [2, 2], scope='pool5')
       net = slim.conv2d(net, 1024, [9, 8], padding='VALID', scope='fc6')
       # net = slim.dropout(net, dropout_keep_prob, scope='dropout6')
-      net = slim.conv2d(net, 2048, [1, 1], scope='fc7')
+      net = slim.conv2d(net, 1024, [1, 1], scope='fc7')
       # net = slim.dropout(net, dropout_keep_prob, scope='dropout7')
       net = tf.squeeze(net, [1, 2], name='squeezed')
       print(net)
