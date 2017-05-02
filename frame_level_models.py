@@ -215,7 +215,7 @@ class TemporalPoolingCNNModel(models.BaseModel):
 
     net = tf.reshape(net, [-1, max_frame, 128])
     net = utils.FramePooling(net, 'max')
-    net = slim.fully_connected(net, 1024, scope='fc4')
+    net = slim.fully_connected(net, 512, scope='fc4')
     print(net)
 
     aggregated_model = getattr(video_level_models,
