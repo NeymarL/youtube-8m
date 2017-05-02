@@ -194,8 +194,9 @@ class TemporalPoolingCNNModel(models.BaseModel):
       model in the 'predictions' key. The dimensions of the tensor are
       'batch_size' x 'num_classes'.
     """
-    print(model_input, vocab_size)
-    max_frame = model_input.get_shape().as_list()[1]
+    max_frame = 100
+    model_input = SampleRandomFrames(model_input, num_frames, max_frame)
+    # max_frame = model_input.get_shape().as_list()[1]
     image = tf.reshape(model_input, [-1, 32, 32])
     image = tf.expand_dims(image, 3)
     with slim.arg_scope([slim.conv2d],
@@ -214,8 +215,8 @@ class TemporalPoolingCNNModel(models.BaseModel):
       print(net)
 
     net = tf.reshape(net, [-1, max_frame, 128])
-    net = utils.FramePooling(net, 'average')
-    net = slim.fully_connected(net, 1024, scope='fc4')
+    net = utils.FramePooling(net, 'max')
+    net = slim.fully_connected(net, 512, scope='fc4')
     print(net)
 
     aggregated_model = getattr(video_level_models,
