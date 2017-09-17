@@ -1,3 +1,8 @@
+# YouTube-8M Competition
+
+* My major modifications on file `frame_level_models.py`.
+
+---
 # YouTube-8M Tensorflow Starter Code
 
 This repo contains starter code for training and evaluating machine learning
